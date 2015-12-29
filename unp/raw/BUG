@@ -1,0 +1,2 @@
+unix下的<sys/socket.h>中没有实现PF_PACKET宏定义, 可能不支持PF_PACKET.
+因此, linux_raw.c只在linux下测试编译过.
