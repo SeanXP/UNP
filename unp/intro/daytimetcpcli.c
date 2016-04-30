@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>         //exit();
 #include <string.h>         //bzero();
-#include <sys/socket.h>
+#include <sys/socket.h>     //socket();
 #include <netinet/in.h>     //struct sockaddr_in;
 #include <arpa/inet.h>      //inet_pton();
 #include <unistd.h>         //read(), write(), close();
@@ -48,8 +48,14 @@ int main(int argc, char **argv)
         fprintf(stderr, "usage: %s <Server IP address>\neg. $ ./%s 127.0.0.1\n", argv[0], argv[0]);
         exit(EXIT_FAILURE);
     }
-    //建立网际(AF_INET)字节流(SOCK_STREAM)套接字 ==> TCP Socket
-    //返回一个int型的文件描述符, 表示此套接字接口(一般为3开始, 0,1,2对应stdin,stdout,stderr)
+
+    //int socket(int domain, int type, int protocol);
+    // domain:  communications domain; PF_INET,PF_INET6,PF_ROUTE,PF_LOCAL,PF_UNIX;
+    // type:    SOCK_STREAM,SOCK_DGRAM,SOCK_RAW;
+    // protocol: 0 - default protocol for this address family and type; IPPROTO_TCP,IPPROTO_UDP;
+    //建立网际(AF_INET == PF_INET)字节流(SOCK_STREAM)套接字 ==> TCP Socket;
+    // <bits/socket.h>, #define AF_INET PF_INET
+    //返回一个int型的文件描述符, 表示此套接字接口(一般为3开始, 0,1,2对应stdin,stdout,stderr);
     if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         fprintf(stderr, "socket() error");
@@ -83,9 +89,9 @@ int main(int argc, char **argv)
     // struct sockaddr, 通用套接字地址结构.
     // connect(),建立TCP连接
     // 成功返回0, 失败返回-1并设置errno.
-    if (connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0)
+    if (connect(sockfd, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0)
     {
-        fprintf(stderr, "connect() error");
+        perror("connect() error");
         exit(EXIT_FAILURE);
     }
 

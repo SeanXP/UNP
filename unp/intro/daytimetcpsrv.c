@@ -51,7 +51,7 @@
 #include <unistd.h>         //write();
 
 #define MAXLINE     4096    /* max text line length */
-#define LISTENQ     1024    /* 2nd argument to listen() , 排队的最大连接数*/
+#define LISTENQ     128     /* 2nd argument to listen()*/
 
 int main(int argc, char **argv)
 {
@@ -60,27 +60,38 @@ int main(int argc, char **argv)
     char                    buff[MAXLINE];
     time_t                  ticks;
 
-    listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    if((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        perror("socket() error");
+        exit(EXIT_FAILURE);
+    }
 
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family      = AF_INET;
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);   // 通配地址INADDR_ANY == 0, 表示交由内核选择;
     servaddr.sin_port        = htons(13);           /* daytime server port */
 
     // int bind(int sockfd, struct sockaddr * my_addr, int addrlen);
-    // bind()用来设置给参数sockfd 的socket 一个名称.
+    // 为sockfd指定端口(my_addr.sin_port)或IP(my_addr.sin_addr);
     // 此名称由参数my_addr 指向一个sockaddr 结构, 对于不同的socket domain 定义了一个通用的数据结构
-    bind(listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
+    if(bind(listenfd, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0)
+    {
+        perror("bind() error");
+        exit(EXIT_FAILURE);
+    }
 
-    // int listen(int s, int backlog);
-    // listen()用来监听描述符s 的socket连接请求.
-    // 参数backlog 指定同时能处理的最大连接要求, 如果连接数目达此上限则client 端将收到ECONNREFUSED 的错误.
-    // listen()并未开始接收连接请求, 只设置socket 为listen 模式,真正接收client 端连线的是accept().
-    // 通常listen()会在socket(), bind()之后调用, 接着才调用accept().
-    // 成功则返回0, 失败返回-1, 错误原因存于errno
-    // listen()只适用SOCK_STREAM 或SOCK_SEQPACKET 的socket 类型.
-    // 如果socket 为AF_INET 则参数backlog 最大值可设至128.
-    listen(listenfd, LISTENQ);
+    // int listen(int sockfd, int backlog);
+    // listen()配置未连接的sockfd为被动socket, 并开始接受该socket的连接;
+    // listen()只设置socket 为listen 状态, 真正接收client端连接请求的是accept();
+    // 参数backlog 指定同时能处理的最大连接要求, 如果连接数目达此上限则client 端将收到ECONNREFUSED 的错误;
+    // 如果socket 为AF_INET 则参数backlog 最大值可设至128;
+    // listen()只适用SOCK_STREAM 或SOCK_SEQPACKET 的socket 类型, 不适合UDP(无连接);
+    // 成功则返回0, 失败返回-1, 错误原因存于errno.
+    if(listen(listenfd, LISTENQ) < 0)
+    {
+        perror("listen() error");
+        exit(EXIT_FAILURE);
+    }
 
     for ( ; ; ) {
         // int accept(int s, struct sockaddr * addr, int * addrlen);
@@ -90,7 +101,11 @@ int main(int argc, char **argv)
         //  而原来参数s 的socket 能继续使用accept()来接受新的连线要求.
         // 连线成功时, 参数addr 所指的结构会被系统填入远程主机的地址数据, 参数addrlen 为scokaddr 的结构长度.
         // 成功则返回新的socket 处理代码, 失败返回-1, 错误原因存于errno 中.
-        connfd = accept(listenfd, (struct sockaddr *) NULL, NULL);
+        if((connfd = accept(listenfd, (struct sockaddr *) NULL, NULL)) < 0)
+        {
+            perror("accept() error");
+            exit(EXIT_FAILURE);
+        }
         //这里不关心客户端的数据, 因此传递NULL值.
 
         ticks = time(NULL);

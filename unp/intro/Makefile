@@ -15,6 +15,7 @@ tag:
 	ctags -R .
 .PHONY : test
 test:
+	# use port 13 (reserve port: 0~1024), need root authority;
 	sudo ./daytimetcpsrv &
 	sleep 1
 	./daytimetcpcli 127.0.0.1
