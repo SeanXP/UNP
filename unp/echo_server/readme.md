@@ -42,6 +42,17 @@ version-02使用signal()配置了SIGCHLD的信号处理函数, 并在函数中, 
             printf("child pid[%d] terminated.\n", pid);
     }
 
+issue: I/O Multiplexing (I/O复用)
+
+当客户端进程阻塞于(标准输入)的fget()调用期间，如果服务器进程被杀死，则:
+
+1. 服务器进程(主动关闭-FIN_WAIT_1)发送FIN至客户端，客户端(被动关闭-CLOSE_WAIT)回应ACK，服务器端完成TCP半关闭(FIN_WAIT_2);
+2. 由于客户端进程阻塞于fget()系统调用中，正等待stdin的用户输入，则客户端暂时无法处理当前Socket的关闭请求, 则服务器将长期处于(FIN_WAIT_2), 客户端处于(CLOSE_WAIT)状态;
+3. 客户端从fget()中返回，读写socket时才会发现socket已半关闭;
+4. 客户端进程关闭连接, 发送FIN至服务器端, 服务器端(TIME_WAIT)发送ACK至客户端，客户端完成TCP关闭(CLOSED);
+
+想要进程立刻得知socket已关闭(即使在该进程阻塞于其他系统调用时), 则要用到I/O复用功能。
+
 ### Socket Notes
 1. 当fork子进程时，必须捕获SIGCHLD信号;
 2. 当捕获信号时，必须处理被中断的系统调用；
