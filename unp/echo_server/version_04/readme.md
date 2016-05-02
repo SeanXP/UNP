@@ -57,13 +57,18 @@ issue: I/O Multiplexing (I/O复用)
 
 使用select()持续检查stdin & socket的状态:
 
-* 用户在stdin输入数据, 则stdin变得可读，由select()跳入stdin分支，读取stdin的输入发送至socket;
-* 用户在stdin输入EOF, 由于客户端现在是阻塞在select(), 而非fget(), 且EOF不会使得stdin变为可读, 因此EOF不能退出客户端，而Ctrl+C可以;
+* 用户在stdin输入数据/EOF, 则stdin变得可读，由select()跳入stdin分支，读取stdin的输入发送至socket / EOF结束stdin输入;
 * 服务器端发送回显数据, socket变为可读，由select()跳入socket分支, 读取Socket的数据(read返回一个大于0的值)并显示到stdout;
 * 服务器端退出，发送FIN，socket仍变为可读，由select()跳入socket分支，读取Socket的数据(read返回0/EOF), 结束客户端进程;
 * 服务器端意外退出，客户端发送数据后返回RST，则socket仍变为可读，由select()跳入socket分支，读取Socket的数据(read返回-1), 结束客户端进程;
 
 select()巧妙解决了多个文件描述符(这里是标准输入stdin与网络socket)的读/写/异常检测问题.
+
+issue:
+
+* 用户在stdin输入数据EOF后，stdin变得可读，由select()跳入stdin分支，检测为EOF则直接结束函数，返回main()，而main()随后也直接终止，即socket会被close()掉。
+* 问题在于，EOF仅仅代表完成了套接字的输出结束，不代表输入也结束，可能仍有数据在去往服务器的路上，或者仍有应答在返回客户端的路上。
+* 因此不能在stdin EOF后直接结束socket; 这里需要一种半关闭TCP连接的方法，即shutdown();
 
 ### Socket Notes
 1. 当fork子进程时，必须捕获SIGCHLD信号;

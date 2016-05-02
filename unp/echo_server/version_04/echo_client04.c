@@ -125,6 +125,8 @@ void str_cli(FILE *fp, int sockfd)
                     {
                         write(sockfd, buffer, strlen(buffer)); //发送至socket发送缓冲区
                     }
+                    else    // EOF, input end.
+                        return;
                 }
                 break;
         }
