@@ -54,6 +54,8 @@
 #include <time.h>		//time();
 #include <arpa/inet.h>  //inet_pton();
 #include <unistd.h>     //write();
+#include <signal.h>     //signal();
+#include <sys/wait.h>   //wait();
 #include <errno.h>
 
 #define BUFFER_MAX 	4096	// max text line length
@@ -107,6 +109,7 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
+    //void (*signal(int sig, void (*func)(int)))(int);
     signal(SIGCHLD, sig_child);	//为SIGCHLD匹配自定义的函数, 使得处理子进程僵死的问题.
 
     //主进程负责监听, 并为每个连接fork一个新的进程;

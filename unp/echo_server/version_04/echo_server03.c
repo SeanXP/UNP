@@ -54,6 +54,8 @@
 #include <time.h>		//time();
 #include <arpa/inet.h>  //inet_pton();
 #include <unistd.h>     //write();
+#include <signal.h>     //signal();
+#include <sys/wait.h>   //wait();
 #include <errno.h>
 
 #define BUFFER_MAX 	4096	// max text line length

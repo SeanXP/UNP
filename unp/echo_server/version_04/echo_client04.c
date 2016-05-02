@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 void str_cli(FILE *fp, int sockfd)
 {
     int maxfdp1 = 0;
-    struct fd_set fds;
+    fd_set fds;
     char buffer[BUFFER_MAX + 1];
 
     if(fileno(fp) > sockfd)
