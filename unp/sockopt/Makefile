@@ -1,7 +1,8 @@
-OBJECT=sockopt
+OBJECT=sockopt checkopts
 CC=gcc
 FLAGS=
 
+.PHONY : TARGET
 TARGET:$(OBJECT)
 
 #-------------------------------
@@ -9,9 +10,14 @@ $(OBJECT):%:%.c
 	$(CC) $< $(FLAGS) -o $@
 #-------------------------------
 
-
-clean:
-	-rm $(OBJECT)
+.PHONY : tag
 tag:
 	ctags -R .
-	
+
+.PHONY : test
+test:
+	./sockopt
+
+.PHONY : clean
+clean:
+	-rm $(OBJECT)
