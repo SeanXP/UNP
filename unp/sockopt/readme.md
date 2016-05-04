@@ -29,7 +29,23 @@
 |SOL_SOCKET|SO_OOBINLINE| 开启则带外数据将留在正常的输入队列 |
 |SOL_SOCKET|SO_RCVBUF| 接收缓冲区, 可以修改默认大小 |
 |SOL_SOCKET|SO_SNDBUF| 发送缓冲区, 可以修改默认大小 |
+|SOL_SOCKET|SO_RCVLOWAT| 接收低水位标记, select()返回可读状态的最小数据量 |
+|SOL_SOCKET|SO_SNDLOWAT| 发送低水位标记, select()返回可写状态的最小数据量 |
+|SOL_SOCKET|SO_RCVTIMEO| 接收超时值 |
+|SOL_SOCKET|SO_SNDTIMEO| 发送超时值 |
+|SOL_SOCKET|SO_TYPE| 返回套接字的类型(SOCK_STREAM,SOCK_DGRAM...) |
 
-##IPPROTO_IP
+##IPPROTO_IP (IPv4)
+
+|level|optname|description|
+| :---: | :----: | :----: |
+|IPPROTO_IP|IP_HDRINCL| 为原始IP套接字构造IP首部 |
+|IPPROTO_IP|IP_OPTIONS| 允许在IPv4首部设置IP选项 |
+|IPPROTO_IP|IP_TOS| 设置IP首部的服务类型字段(TOS) |
+|IPPROTO_IP|IP_TTL| 设置默认TTL值 |
 
 ##IPPROTO_TCP
+|level|optname|description|
+| :---: | :----: | :----: |
+|IPPROTO_TCP|TCP_MAXSEG| TCP连接的最大分节大小(MSS) |
+|IPPROTO_TCP|TCP_NODELAY| 禁止TCP的Nagle算法(默认启动Nagle) |
