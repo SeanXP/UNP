@@ -16,7 +16,7 @@ tag:
 
 .PHONY : test
 test:
-	cd; pwd
+	./$(OBJECT)
 
 .PHONY : clean
 clean:
