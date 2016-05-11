@@ -6,45 +6,6 @@
   > Mail:              < iseanxp+code@gmail.com >
   > Created Time:      < 2014/06/19 >
   > Description:
-
-  //{{{ struct sockaddr
-  struct sockaddr
-  {
-    unsigned short int sa_family;
-    char sa_data[14];
-  };
-
-  * sa_family 为调用socket()时的domain 参数, 即AF_xxxx 值.
-  * sa_data 最多使用14 个字符长度.
-
-  此sockaddr 结构会因使用不同的socket domain 而有不同结构定义,
-  例如使用AF_INET domain,其socketaddr 结构定义便为
-  struct socketaddr_in
-  {
-    unsigned short int sin_family;
-    uint16_t sin_port;
-    struct in_addr sin_addr;
-    unsigned char sin_zero[8];
-  };
-
-  struct in_addr
-  {
-    uint32_t s_addr;
-  };
-
-  1. sin_family 即为sa_family
-  2. sin_port 为使用的port 编号
-  3. sin_addr. s_addr 为IP 地址 sin_zero 未使用.
-  参数 addrlen 为sockaddr 的结构长度.
-
-  返回值：成功则返回0, 失败返回-1, 错误原因存于errno 中.
-
-  错误代码：
-  1、EBADF 参数sockfd 非合法socket 处理代码.
-  2、EACCESS 权限不足
-  3、ENOTSOCK 参数sockfd 为一文件描述词, 非socket.
-  //}}}
-
  ****************************************************************/
 #include <stdio.h>
 #include <stdlib.h>		//exit();
