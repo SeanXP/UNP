@@ -42,17 +42,38 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    /*
     //{{{
     {
-        // 使用getpeername()
         // The getpeername() function returns the address of the peer connected to the specified socket.
-        socklen_t len;
-        char IPdoctdec[20];
-        getpeername(sockfd, (SA *)&ss, &len);
-        printf("connected to %s\n", inet_ntop(ss.ss_family, (void *)&s, IPdoctdec, 16));
+        struct sockaddr_storage cliaddr;
+        socklen_t len = sizeof(struct sockaddr_storage);
+        // int getpeername(int socket, struct sockaddr *address, socklen_t *restrict address_len);
+        if(getpeername(sockfd, (struct sockaddr *)&cliaddr, &len) < 0)
+        {
+            perror("getpeername() error");
+            exit(EXIT_FAILURE);
+        }
+        if(cliaddr.ss_family == AF_INET)
+        {
+            // sockaddr_storage剩余的空间为用户通明，必须强制类型转换后才可访问其他字段。
+            struct sockaddr_in *sockp = (struct sockaddr_in *)&cliaddr;
+            char IPstr[INET_ADDRSTRLEN];
+            // int inet_ntop(int af, const void * src, char * dst, socklen_t size);
+            printf("tcp_connect() connected to %s:%d\n", inet_ntop(sockp->sin_family, (const void *)&sockp->sin_addr, IPstr, INET_ADDRSTRLEN), ntohs(sockp->sin_port));
+        }
+        else if(cliaddr.ss_family == AF_INET6)
+        {
+            struct sockaddr_in6 *sockp = (struct sockaddr_in6 *)&cliaddr;
+            /*char IPstr[INET_ADDRSTRLEN6];*/       // Mac OS X的<netinet/in.h>中未定义INET_ADDRSTRLEN6...
+            char IPstr[46];
+            printf("connected to %s:%d\n", inet_ntop(sockp->sin6_family, (const void *)&sockp->sin6_addr, IPstr, 46), ntohs(sockp->sin6_port));
+        }
+        else
+        {
+            fprintf(stderr, "getpeername() error, AF_INET:%d, AF_INET6:%d, sockp->sin_family:%d\n", AF_INET6, AF_INET6, cliaddr.ss_family);
+        }
+    }
     //}}}
-    */
     //{{{ read()函数读取服务器应答
     // TCP为无记录边界的字节流协议, 故服务器应答类似如下:"Mon May 26 20:58:40 2003\r\n"
     // 由于TCP的分片，导致服务器应答格式不确定，故放入循环持续读取.
